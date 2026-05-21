@@ -286,7 +286,7 @@ export default function SettingsScreen({ isVisible, onClose, settings, onUpdateS
               </View>
               <View style={styles.aboutRow}>
                 <Text style={styles.aboutLabel}>Version</Text>
-                <Text style={styles.aboutValue}>V3.0.0</Text>
+                <Text style={styles.aboutValue}>V5.0.0</Text>
               </View>
               <View style={styles.aboutRow}>
                 <Text style={styles.aboutLabel}>Author</Text>
