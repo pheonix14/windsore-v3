@@ -56,6 +56,38 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [history, setHistory] = useState([]); // { url, title, timestamp }
 
+  const [settings, setSettings] = useState({
+    homepage: 'https://duckduckgo.com',
+    selectedEngine: 0,
+    selectedZoom: 3, // 100%
+    selectedAgent: 0,
+    privacyShields: true,
+    doNotTrack: true,
+    httpsUpgrade: true,
+    blockThirdPartyCookies: false,
+    blockPopups: true,
+    safetyWarning: true,
+    preventCrossSiteTracking: true,
+    darkMode: true,
+    forceDarkOnSites: false,
+    nightFilter: false,
+    showImages: true,
+    readerMode: false,
+    enableJS: true,
+    cookiesEnabled: true,
+    mediaAutoplay: false,
+    webRTC: true,
+    locationAccess: false,
+    cameraAccess: false,
+    micAccess: false,
+    textBold: false,
+    highContrast: false,
+  });
+
+  const handleUpdateSetting = (key, value) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
   // Password Manager Script inject pipeline
   const [passwordScript, setPasswordScript] = useState('');
 
@@ -243,6 +275,7 @@ export default function App() {
           onClearAutofill={() => setPasswordScript('')}
           selectedTabId={activeTabId}
           onAddToHistory={handleAddToHistory}
+          settings={settings}
         />
       </View>
 
@@ -307,6 +340,8 @@ export default function App() {
       <SettingsScreen
         isVisible={showSettings}
         onClose={() => setShowSettings(false)}
+        settings={settings}
+        onUpdateSetting={handleUpdateSetting}
       />
 
       {/* Hidden Easter Egg Modal Deck */}

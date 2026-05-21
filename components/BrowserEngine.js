@@ -32,7 +32,35 @@ export default function BrowserEngine({
   onClearAutofill,
   selectedTabId,
   onAddToHistory,
+  settings,
 }) {
+  const {
+    selectedEngine = 0,
+    selectedZoom = 3,
+    selectedAgent = 0,
+    privacyShields = true,
+    doNotTrack = true,
+    httpsUpgrade = true,
+    blockThirdPartyCookies = false,
+    blockPopups = true,
+    safetyWarning = true,
+    preventCrossSiteTracking = true,
+    darkMode = true,
+    forceDarkOnSites = false,
+    nightFilter = false,
+    showImages = true,
+    readerMode = false,
+    enableJS = true,
+    cookiesEnabled = true,
+    mediaAutoplay = false,
+    webRTC = true,
+    locationAccess = false,
+    cameraAccess = false,
+    micAccess = false,
+    textBold = false,
+    highContrast = false,
+  } = settings || {};
+
   const [currentUrl, setCurrentUrl] = useState(url);
   const [inputUrl, setInputUrl] = useState(url);
   const [loading, setLoading] = useState(false);
@@ -68,16 +96,26 @@ export default function BrowserEngine({
     if (!cleanUrl) return;
 
     if (cleanUrl.match(/^https?:\/\//i)) {
-      // Force HTTPS if Always-On mode is active
-      if (alwaysOnActive && cleanUrl.startsWith('http://')) {
+      // Force HTTPS if Always-On mode or HTTPS Upgrade is active
+      if ((alwaysOnActive || httpsUpgrade) && cleanUrl.startsWith('http://')) {
         cleanUrl = cleanUrl.replace('http://', 'https://');
       }
     } else if (cleanUrl.includes('.') && !cleanUrl.includes(' ')) {
       // Direct domain input
       cleanUrl = `https://${cleanUrl}`;
     } else {
-      // Search query (DuckDuckGo for Brave/Via style privacy)
-      cleanUrl = `https://duckduckgo.com/?q=${encodeURIComponent(cleanUrl)}`;
+      // Search query based on selected engine
+      const engines = [
+        'https://duckduckgo.com/?q=',
+        'https://google.com/search?q=',
+        'https://bing.com/search?q=',
+        'https://search.yahoo.com/search?p=',
+        'https://search.brave.com/search?q=',
+        'https://www.ecosia.org/search?q=',
+        'https://www.startpage.com/search?q='
+      ];
+      const engineUrl = engines[selectedEngine] || engines[0];
+      cleanUrl = `${engineUrl}${encodeURIComponent(cleanUrl)}`;
     }
     
     setCurrentUrl(cleanUrl);
@@ -195,6 +233,55 @@ export default function BrowserEngine({
     }
   };
 
+  const getActiveUserAgent = () => {
+    if (isPcMode) return DESKTOP_UA;
+    const userAgents = [
+      '',
+      'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+      'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+      'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+    ];
+    return userAgents[selectedAgent] || MOBILE_UA;
+  };
+
+  const getRunAfterLoadScript = () => {
+    let script = '';
+    if (alwaysOnActive || privacyShields) {
+      script += adBlockerScript + '\n';
+    }
+    
+    let cssRules = '';
+    if (forceDarkOnSites) {
+      cssRules += 'html { filter: invert(1) hue-rotate(180deg) !important; } img, video, iframe { filter: invert(1) hue-rotate(180deg) !important; } ';
+    }
+    if (!showImages) {
+      cssRules += 'img, image, [style*="background-image"] { display: none !important; content-visibility: hidden !important; } ';
+    }
+    if (textBold) {
+      cssRules += '* { font-weight: 700 !important; } ';
+    }
+    if (highContrast) {
+      cssRules += '* { text-shadow: none !important; } ';
+    }
+
+    if (cssRules) {
+      script += `
+        (function() {
+          const style = document.createElement('style');
+          style.id = 'windsore-custom-style';
+          style.innerHTML = ${JSON.stringify(cssRules)};
+          document.head.appendChild(style);
+        })();
+      `;
+    }
+    return script;
+  };
+
+  const zoomPercentages = [50, 75, 90, 100, 110, 125, 150, 200];
+  const activeZoom = zoomPercentages[selectedZoom] || 100;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -245,9 +332,9 @@ export default function BrowserEngine({
           <WebView
             ref={webViewRef}
             source={{ uri: currentUrl }}
-            userAgent={isPcMode ? DESKTOP_UA : MOBILE_UA}
+            userAgent={getActiveUserAgent()}
             injectedJavaScriptBeforeContentLoaded={consoleOverrideScript}
-            injectedJavaScript={adBlockerScript}
+            injectedJavaScript={getRunAfterLoadScript()}
             onMessage={handleMessage}
             onNavigationStateChange={(navState) => {
               setCanGoBack(navState.canGoBack);
@@ -259,12 +346,26 @@ export default function BrowserEngine({
             }}
             style={styles.webview}
             scalesPageToFit={isPcMode}
-            domStorageEnabled
-            javaScriptEnabled
+            domStorageEnabled={cookiesEnabled}
+            javaScriptEnabled={enableJS}
             allowsFullscreenVideo
-            geolocationEnabled
+            geolocationEnabled={locationAccess}
             mixedContentMode="always"
+            textZoom={activeZoom}
+            thirdPartyCookiesEnabled={cookiesEnabled && !blockThirdPartyCookies}
+            mediaPlaybackRequiresUserAction={!mediaAutoplay}
           />
+
+          {/* Night Filter Orange Tint Overlay */}
+          {nightFilter && (
+            <View
+              pointerEvents="none"
+              style={[
+                StyleSheet.absoluteFillObject,
+                { backgroundColor: 'rgba(230, 120, 0, 0.12)', zIndex: 100 }
+              ]}
+            />
+          )}
 
           {/* Interactive sliding Web Developer Console Drawer */}
           {showConsole && (

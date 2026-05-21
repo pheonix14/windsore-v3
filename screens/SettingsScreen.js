@@ -33,41 +33,60 @@ const USER_AGENTS = [
   { name: 'Googlebot', value: 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' },
 ];
 
-export default function SettingsScreen({ isVisible, onClose }) {
-  // --- General ---
-  const [homepage, setHomepage] = useState('https://duckduckgo.com');
-  const [selectedEngine, setSelectedEngine] = useState(0);
-  const [selectedZoom, setSelectedZoom] = useState(3); // 100%
-  const [selectedAgent, setSelectedAgent] = useState(0);
+export default function SettingsScreen({ isVisible, onClose, settings, onUpdateSetting }) {
+  const {
+    homepage = 'https://duckduckgo.com',
+    selectedEngine = 0,
+    selectedZoom = 3,
+    selectedAgent = 0,
+    privacyShields = true,
+    doNotTrack = true,
+    httpsUpgrade = true,
+    blockThirdPartyCookies = false,
+    blockPopups = true,
+    safetyWarning = true,
+    preventCrossSiteTracking = true,
+    darkMode = true,
+    forceDarkOnSites = false,
+    nightFilter = false,
+    showImages = true,
+    readerMode = false,
+    enableJS = true,
+    cookiesEnabled = true,
+    mediaAutoplay = false,
+    webRTC = true,
+    locationAccess = false,
+    cameraAccess = false,
+    micAccess = false,
+    textBold = false,
+    highContrast = false,
+  } = settings || {};
 
-  // --- Privacy & Security ---
-  const [privacyShields, setPrivacyShields] = useState(true);
-  const [doNotTrack, setDoNotTrack] = useState(true);
-  const [httpsUpgrade, setHttpsUpgrade] = useState(true);
-  const [blockThirdPartyCookies, setBlockThirdPartyCookies] = useState(false);
-  const [blockPopups, setBlockPopups] = useState(true);
-  const [safetyWarning, setSafetyWarning] = useState(true);
-  const [preventCrossSiteTracking, setPreventCrossSiteTracking] = useState(true);
-
-  // --- Display ---
-  const [darkMode, setDarkMode] = useState(true);
-  const [forceDarkOnSites, setForceDarkOnSites] = useState(false);
-  const [nightFilter, setNightFilter] = useState(false);
-  const [showImages, setShowImages] = useState(true);
-  const [readerMode, setReaderMode] = useState(false);
-
-  // --- Content ---
-  const [enableJS, setEnableJS] = useState(true);
-  const [mediaAutoplay, setMediaAutoplay] = useState(false);
-  const [webRTC, setWebRTC] = useState(true);
-  const [cookiesEnabled, setCookiesEnabled] = useState(true);
-  const [locationAccess, setLocationAccess] = useState(false);
-  const [cameraAccess, setCameraAccess] = useState(false);
-  const [micAccess, setMicAccess] = useState(false);
-
-  // --- Accessibility ---
-  const [textBold, setTextBold] = useState(false);
-  const [highContrast, setHighContrast] = useState(false);
+  const setHomepage = (val) => onUpdateSetting('homepage', val);
+  const setSelectedEngine = (val) => onUpdateSetting('selectedEngine', val);
+  const setSelectedZoom = (val) => onUpdateSetting('selectedZoom', val);
+  const setSelectedAgent = (val) => onUpdateSetting('selectedAgent', val);
+  const setPrivacyShields = (val) => onUpdateSetting('privacyShields', val);
+  const setDoNotTrack = (val) => onUpdateSetting('doNotTrack', val);
+  const setHttpsUpgrade = (val) => onUpdateSetting('httpsUpgrade', val);
+  const setBlockThirdPartyCookies = (val) => onUpdateSetting('blockThirdPartyCookies', val);
+  const setBlockPopups = (val) => onUpdateSetting('blockPopups', val);
+  const setSafetyWarning = (val) => onUpdateSetting('safetyWarning', val);
+  const setPreventCrossSiteTracking = (val) => onUpdateSetting('preventCrossSiteTracking', val);
+  const setDarkMode = (val) => onUpdateSetting('darkMode', val);
+  const setForceDarkOnSites = (val) => onUpdateSetting('forceDarkOnSites', val);
+  const setNightFilter = (val) => onUpdateSetting('nightFilter', val);
+  const setShowImages = (val) => onUpdateSetting('showImages', val);
+  const setReaderMode = (val) => onUpdateSetting('readerMode', val);
+  const setEnableJS = (val) => onUpdateSetting('enableJS', val);
+  const setCookiesEnabled = (val) => onUpdateSetting('cookiesEnabled', val);
+  const setMediaAutoplay = (val) => onUpdateSetting('mediaAutoplay', val);
+  const setWebRTC = (val) => onUpdateSetting('webRTC', val);
+  const setLocationAccess = (val) => onUpdateSetting('locationAccess', val);
+  const setCameraAccess = (val) => onUpdateSetting('cameraAccess', val);
+  const setMicAccess = (val) => onUpdateSetting('micAccess', val);
+  const setTextBold = (val) => onUpdateSetting('textBold', val);
+  const setHighContrast = (val) => onUpdateSetting('highContrast', val);
 
   // UI accordion state
   const [openSection, setOpenSection] = useState('general');
