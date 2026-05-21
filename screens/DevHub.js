@@ -535,7 +535,7 @@ export default function DevHub({
                     <TouchableOpacity
                       style={[styles.addButton, { marginTop: 20 }]}
                       onPress={() => {
-                        const injectCode = \`document.open(); document.write(\\\`\${editorCode.replace(/\`/g, '\\\\`')}\\\`); document.close();\`;
+                        const injectCode = "document.open(); document.write(`" + editorCode.replace(/`/g, '\\\\`') + "`); document.close();";
                         onInjectScript(injectCode);
                         onClose();
                       }}
